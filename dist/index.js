@@ -24848,19 +24848,6 @@ var import_core = __toESM(require_core());
 
 // src/lib.js
 var import_github = __toESM(require_github());
-var createComment = async function(octokit, pull, message) {
-  try {
-    await octokit.issues.createComment({
-      owner: import_github.context.repo.owner,
-      repo: import_github.context.repo.repo,
-      issue_number: pull,
-      body: message
-    });
-  } catch (e) {
-    console.log("Error creating comment");
-    console.log(e.message);
-  }
-};
 var cleanup = async function(octokit, tempBranch) {
   try {
     console.log(`Deleting temp branch: ${tempBranch}`);
@@ -24877,67 +24864,29 @@ var cleanup = async function(octokit, tempBranch) {
 
 // src/merge.js
 var groupLabeledPullRequests = async function(octokit) {
-  const splitUrl = import_github2.context.payload.comment.issue_url.split("/");
-  const currentIssueNumber = parseInt(splitUrl[splitUrl.length - 1], 10);
   const tempBranch = `temp-ci-${import_github2.context.repo.repo}-${Date.now()}`;
   try {
     var pulls = [];
     var comment = "### Going to merge pull requests:\n";
     var prLinks = "";
     const label = (0, import_core.getInput)("target-label");
-    const excludeCurrent = (0, import_core.getInput)("exclude-current");
     const q = `is:pull-request label:${label} repo:${import_github2.context.repo.owner}/${import_github2.context.repo.repo} state:open`;
     const { data } = await octokit.search.issuesAndPullRequests({
       q,
       sort: "created",
       order: "desc"
     });
-    if (excludeCurrent === "true" && data.total_count <= 0) {
-      return "default";
-    }
-    const { data: currentPull } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", {
-      owner: import_github2.context.repo.owner,
-      repo: import_github2.context.repo.repo,
-      pull_number: currentIssueNumber
-    });
-    if (excludeCurrent !== "true" && data.total_count <= 0) {
-      prLinks += `- ${currentPull.html_url}
-`;
-      comment += prLinks;
-      await createComment(octokit, currentIssueNumber, comment);
-      await mergeBranches(octokit, [currentPull], tempBranch);
-      await createComment(
-        octokit,
-        currentIssueNumber,
-        `:rocket: All pull requests were merged successfully from \`${tempBranch}\` into \`${(0, import_core.getInput)("integration-branch")}\`.
-
-**Summary:**
----
-${prLinks}:`
-      );
-      await cleanup(octokit, tempBranch);
-      (0, import_core.setOutput)("temp-branch", tempBranch);
-      return;
-    }
     if (data.total_count > 0) {
-      if (excludeCurrent !== "true") {
-        console.log("Pushing current PR to array");
-        prLinks += `- ${currentPull.html_url}
-`;
-        pulls.push(currentPull);
-      }
       for (const item of data.items) {
-        if (item.number !== currentIssueNumber) {
-          const accPull = await octokit.request(`GET /repos/{owner}/{repo}/pulls/{pull_number}`, {
-            owner: import_github2.context.repo.owner,
-            repo: import_github2.context.repo.repo,
-            pull_number: item.number
-          });
-          console.log(`Pushing External PR #${item.number} to array`);
-          prLinks += `- ${item.html_url}
+        const accPull = await octokit.request(`GET /repos/{owner}/{repo}/pulls/{pull_number}`, {
+          owner: import_github2.context.repo.owner,
+          repo: import_github2.context.repo.repo,
+          pull_number: item.number
+        });
+        console.log(`Pushing External PR #${item.number} to array`);
+        prLinks += `- ${item.html_url}
 `;
-          pulls.push(accPull.data);
-        }
+        pulls.push(accPull.data);
       }
     }
     await mergeBranches(octokit, pulls, tempBranch);
@@ -24947,11 +24896,6 @@ ${prLinks}:`
     if (e.message === "Merge conflict") {
       console.log("Merge conflict error.");
     }
-    const message = `:ghost: Merge failed with error:
-\`\`\`shell
-${e.message}
-\`\`\``;
-    await createComment(octokit, currentIssueNumber, message);
     await cleanup(octokit, tempBranch);
     (0, import_core.setFailed)(e.message);
   }
