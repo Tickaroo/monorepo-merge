@@ -74,16 +74,9 @@ export const groupLabeledPullRequests = async function (octokit) {
                 }
             }
         }
-        //comment and merge branches
-        comment += prLinks;
-        await createComment(octokit, currentIssueNumber, comment);
+        
         await mergeBranches(octokit, pulls, tempBranch);
-        //comment success in PR if merge is successful.
-        await createComment(
-            octokit,
-            currentIssueNumber,
-            `:rocket: All pull requests were merged successfully from \`${tempBranch}\` into \`${getInput('integration-branch')}\`.\n\n**Summary:**\n---\n${prLinks}`,
-        );
+        
         //cleanup function (delete temp branch)
         await cleanup(octokit, tempBranch);
         setOutput('temp-branch', tempBranch);
