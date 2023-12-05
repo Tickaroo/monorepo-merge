@@ -6,9 +6,9 @@ on:
       - unlabeled
       - synchronize
 jobs:
-  pr_commented:
+  merge:
     # This job only runs for pull request comments
-    name: Deploy on comment
+    name: Merge on label
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,4 +20,4 @@ jobs:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           target-label: stage-ready
           main-branch: 'main'
-          integratoin-branch: 'staging'
+          integration-branch: 'staging'

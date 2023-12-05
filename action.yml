@@ -1,5 +1,5 @@
 name: 'Monorepo merge'
-author: 'luisgj'
+author: 'Tickaroo'
 branding:
   icon: 'git-pull-request'
   color: 'orange'
@@ -24,12 +24,9 @@ inputs:
   private-token:
     description: 'The token used to push to integration branch.'
     required: true
-  trigger-comment:
-    description: 'The comment that triggered the workflow.'
-    required: true
 outputs:
   temp-branch:
     description: 'Temp branch with all grouped PRs.'
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: 'node18'
+  main: 'index.js'
