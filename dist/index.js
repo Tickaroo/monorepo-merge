@@ -1989,13 +1989,13 @@ var require_url_state_machine = __commonJS({
               return failure;
             }
             while (isASCIIDigit(input[pointer])) {
-              const number2 = parseInt(at(input, pointer));
+              const number = parseInt(at(input, pointer));
               if (ipv4Piece === null) {
-                ipv4Piece = number2;
+                ipv4Piece = number;
               } else if (ipv4Piece === 0) {
                 return failure;
               } else {
-                ipv4Piece = ipv4Piece * 10 + number2;
+                ipv4Piece = ipv4Piece * 10 + number;
               }
               if (ipv4Piece > 255) {
                 return failure;
@@ -24916,7 +24916,6 @@ var mergeBranches = async function(octokit, pulls, tempBranch) {
     sha
   });
   for (const pull of pulls) {
-    console.log(pull);
     console.log(`Merging Pull Request #${pull.number} into ${tempBranch}`);
     await octokit.request("POST /repos/{owner}/{repo}/merges", {
       owner: import_github2.context.repo.owner,
@@ -24924,7 +24923,7 @@ var mergeBranches = async function(octokit, pulls, tempBranch) {
       base: tempBranch,
       head: pull.head.ref
     });
-    console.log(`Merged Pull Request #${number} into ${tempBranch} successfully.`);
+    console.log(`Merged Pull Request #${pull.number} into ${tempBranch} successfully.`);
   }
   const { data: { commit: { sha: tempSha } } } = await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}", {
     owner: import_github2.context.repo.owner,

@@ -85,7 +85,6 @@ const mergeBranches = async function (octokit, pulls, tempBranch) {
     });
     //merge group branches to tmp branch
     for (const pull of pulls) {
-        console.log(pull)
         console.log(`Merging Pull Request #${pull.number} into ${tempBranch}`);
         await octokit.request('POST /repos/{owner}/{repo}/merges', {
             owner: context.repo.owner,
@@ -93,7 +92,7 @@ const mergeBranches = async function (octokit, pulls, tempBranch) {
             base: tempBranch,
             head: pull.head.ref,
         });
-        console.log(`Merged Pull Request #${number} into ${tempBranch} successfully.`);
+        console.log(`Merged Pull Request #${pull.number} into ${tempBranch} successfully.`);
     }
     //get latest temp branch commit sha
     const { data: { commit: { sha: tempSha } } } = await octokit.request('GET /repos/{owner}/{repo}/branches/{branch}', {
