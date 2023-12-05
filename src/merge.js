@@ -13,11 +13,11 @@ export const groupLabeledPullRequests = async function (octokit) {
     try {
         //get input from Github Job declaration
         var pulls = [];
-        var comment = '### Going to merge pull requests:\n';
         var prLinks = '';
         const label = getInput('target-label');
         //Create search query
         const q = `is:pull-request label:${label} repo:${context.repo.owner}/${context.repo.repo} state:open`;
+        console.log("QUERY " + q)
         //Call github API through the octokit client
         const { data } = await octokit.search.issuesAndPullRequests({
             q,
@@ -36,13 +36,17 @@ export const groupLabeledPullRequests = async function (octokit) {
                 prLinks += `- ${item.html_url}\n`;
                 pulls.push(accPull.data);
             }
+            await mergeBranches(octokit, pulls, tempBranch);
+        
+            //cleanup function (delete temp branch)
+            await cleanup(octokit, tempBranch);
+            setOutput('temp-branch', tempBranch);
+
+        } else {
+            console.log("No open pull requests found")
         }
         
-        await mergeBranches(octokit, pulls, tempBranch);
-        
-        //cleanup function (delete temp branch)
-        await cleanup(octokit, tempBranch);
-        setOutput('temp-branch', tempBranch);
+
     } catch (e) {
         if (e.message === "Merge conflict") {
             console.log("Merge conflict error.")

@@ -24867,10 +24867,10 @@ var groupLabeledPullRequests = async function(octokit) {
   const tempBranch = `temp-ci-${import_github2.context.repo.repo}-${Date.now()}`;
   try {
     var pulls = [];
-    var comment = "### Going to merge pull requests:\n";
     var prLinks = "";
     const label = (0, import_core.getInput)("target-label");
     const q = `is:pull-request label:${label} repo:${import_github2.context.repo.owner}/${import_github2.context.repo.repo} state:open`;
+    console.log("QUERY " + q);
     const { data } = await octokit.search.issuesAndPullRequests({
       q,
       sort: "created",
@@ -24888,10 +24888,12 @@ var groupLabeledPullRequests = async function(octokit) {
 `;
         pulls.push(accPull.data);
       }
+      await mergeBranches(octokit, pulls, tempBranch);
+      await cleanup(octokit, tempBranch);
+      (0, import_core.setOutput)("temp-branch", tempBranch);
+    } else {
+      console.log("No open pull requests found");
     }
-    await mergeBranches(octokit, pulls, tempBranch);
-    await cleanup(octokit, tempBranch);
-    (0, import_core.setOutput)("temp-branch", tempBranch);
   } catch (e) {
     if (e.message === "Merge conflict") {
       console.log("Merge conflict error.");
