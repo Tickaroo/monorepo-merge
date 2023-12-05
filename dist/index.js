@@ -24930,14 +24930,29 @@ var mergeBranches = async function(octokit, pulls, tempBranch) {
     repo: import_github2.context.repo.repo,
     branch: tempBranch
   });
-  console.log(`Updating branch ${integrationBranchName} from ${tempBranch} with commit sha: ${tempSha}.`);
-  await octokit.request("PATCH /repos/{owner}/{repo}/git/refs/{ref}", {
-    owner: import_github2.context.repo.owner,
-    repo: import_github2.context.repo.repo,
-    ref: `heads/${integrationBranchName}`,
-    sha: tempSha,
-    force: true
-  });
+  try {
+    const { data: integrationBranchData } = await octokit.request("GET /repos/{owner}/{repo}/branches/{integrationBranch}", {
+      owner: import_github2.context.repo.owner,
+      repo: import_github2.context.repo.repo,
+      branch: tempBranch
+    });
+    console.log(`Creating branch ${integrationBranchName} from ${tempBranch} with commit sha: ${tempSha}.`);
+    await octokit.request("POST /repos/{owner}/{repo}/git/refs/{ref}", {
+      owner: import_github2.context.repo.owner,
+      repo: import_github2.context.repo.repo,
+      ref: `heads/${integrationBranchName}`,
+      sha: tempSha
+    });
+  } catch (e) {
+    console.log(`Updating branch ${integrationBranchName} from ${tempBranch} with commit sha: ${tempSha}.`);
+    await octokit.request("PATCH /repos/{owner}/{repo}/git/refs/{ref}", {
+      owner: import_github2.context.repo.owner,
+      repo: import_github2.context.repo.repo,
+      ref: `heads/${integrationBranchName}`,
+      sha: tempSha,
+      force: true
+    });
+  }
 };
 
 // index.js
