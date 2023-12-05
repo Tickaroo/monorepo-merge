@@ -8,7 +8,7 @@ inputs:
   target-label:
     description: 'Target label to fetch for PRs'
     required: true
-    default: 'stage-ready'
+    default: 'staging'
   repo-token:
     description: 'Github token secret'
     required: true

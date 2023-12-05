@@ -24869,7 +24869,7 @@ var groupLabeledPullRequests = async function(octokit) {
     var pulls = [];
     var prLinks = "";
     const label = (0, import_core.getInput)("target-label");
-    const q = `is:pull-request label:${label} repo:${import_github2.context.repo.owner}/${import_github2.context.repo.repo} state:open`;
+    const q = `is:pr label:${label} repo:${import_github2.context.repo.owner}/${import_github2.context.repo.repo} state:open`;
     console.log("QUERY " + q);
     const { data } = await octokit.search.issuesAndPullRequests({
       q,

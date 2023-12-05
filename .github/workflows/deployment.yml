@@ -18,6 +18,6 @@ jobs:
         id: group-and-merge
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
-          target-label: stage-ready
+          target-label: staging
           main-branch: 'main'
           integration-branch: 'staging'

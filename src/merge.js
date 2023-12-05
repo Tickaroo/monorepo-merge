@@ -16,7 +16,7 @@ export const groupLabeledPullRequests = async function (octokit) {
         var prLinks = '';
         const label = getInput('target-label');
         //Create search query
-        const q = `is:pull-request label:${label} repo:${context.repo.owner}/${context.repo.repo} state:open`;
+        const q = `is:pr label:${label} repo:${context.repo.owner}/${context.repo.repo} state:open`;
         console.log("QUERY " + q)
         //Call github API through the octokit client
         const { data } = await octokit.search.issuesAndPullRequests({
