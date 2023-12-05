@@ -24885,7 +24885,6 @@ var groupLabeledPullRequests = async function(octokit) {
         console.log(`Pushing External PR #${item.number} to array`);
         pulls.push(accPull.data);
       }
-      console.log(pulls);
       await mergeBranches(octokit, pulls, tempBranch);
       await cleanup(octokit, tempBranch);
       (0, import_core.setOutput)("temp-branch", tempBranch);
@@ -24917,6 +24916,7 @@ var mergeBranches = async function(octokit, pulls, tempBranch) {
     sha
   });
   for (const pull of pulls) {
+    console.log(pull);
     console.log(`Merging Pull Request #${pull.number} into ${tempBranch}`);
     await octokit.request("POST /repos/{owner}/{repo}/merges", {
       owner: import_github2.context.repo.owner,

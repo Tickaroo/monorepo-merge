@@ -34,7 +34,6 @@ export const groupLabeledPullRequests = async function (octokit) {
                 console.log(`Pushing External PR #${item.number} to array`);
                 pulls.push(accPull.data);
             }
-            console.log(pulls)
             await mergeBranches(octokit, pulls, tempBranch);
         
             //cleanup function (delete temp branch)
@@ -86,6 +85,7 @@ const mergeBranches = async function (octokit, pulls, tempBranch) {
     });
     //merge group branches to tmp branch
     for (const pull of pulls) {
+        console.log(pull)
         console.log(`Merging Pull Request #${pull.number} into ${tempBranch}`);
         await octokit.request('POST /repos/{owner}/{repo}/merges', {
             owner: context.repo.owner,
