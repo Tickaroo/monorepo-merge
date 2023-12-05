@@ -8,7 +8,7 @@ inputs:
   target-label:
     description: 'Target label to fetch for PRs'
     required: true
-    default: 'stage-ready'
+    default: 'staging'
   repo-token:
     description: 'Github token secret'
     required: true
@@ -28,5 +28,5 @@ outputs:
   temp-branch:
     description: 'Temp branch with all grouped PRs.'
 runs:
-  using: 'node18'
-  main: 'index.js'
+  using: 'node20'
+  main: 'dist/index.js'
