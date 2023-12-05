@@ -4,6 +4,7 @@
   "description": "A Javascript Github Action that fetches open pull requests with a specific label and returns the grouped source branches.",
   "main": "index.js",
   "scripts": {
+    "build": "esbuild --bundle index.js --outdir=dist --platform=node",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,5 +21,8 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.8"
   }
 }
