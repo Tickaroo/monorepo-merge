@@ -24940,17 +24940,17 @@ var mergeBranches = async function(octokit, pulls, tempBranch) {
     await octokit.request("PATCH /repos/{owner}/{repo}/git/refs/{ref}", {
       owner: import_github2.context.repo.owner,
       repo: import_github2.context.repo.repo,
-      ref: `heads/${integrationBranchName}`,
-      sha: tempSha
+      ref: `refs/heads/${integrationBranchName}`,
+      sha: tempSha,
+      force: true
     });
   } catch (e) {
     console.log(`Creating branch ${integrationBranchName} from ${tempBranch} with commit sha: ${tempSha}.`);
     await octokit.request("POST /repos/{owner}/{repo}/git/refs", {
       owner: import_github2.context.repo.owner,
       repo: import_github2.context.repo.repo,
-      ref: `heads/${integrationBranchName}`,
-      sha: tempSha,
-      force: true
+      ref: `refs/heads/${integrationBranchName}`,
+      sha: tempSha
     });
   }
 };
