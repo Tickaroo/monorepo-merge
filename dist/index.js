@@ -5994,7 +5994,7 @@ var require_dist_node9 = __commonJS({
       }
     };
     var VERSION = "4.4.1";
-    function endpointsToMethods(octokit2, endpointsMap) {
+    function endpointsToMethods(octokit, endpointsMap) {
       const newMethods = {};
       for (const [scope, endpoints] of Object.entries(endpointsMap)) {
         for (const [methodName, endpoint] of Object.entries(endpoints)) {
@@ -6009,16 +6009,16 @@ var require_dist_node9 = __commonJS({
           }
           const scopeMethods = newMethods[scope];
           if (decorations) {
-            scopeMethods[methodName] = decorate(octokit2, scope, methodName, endpointDefaults, decorations);
+            scopeMethods[methodName] = decorate(octokit, scope, methodName, endpointDefaults, decorations);
             continue;
           }
-          scopeMethods[methodName] = octokit2.request.defaults(endpointDefaults);
+          scopeMethods[methodName] = octokit.request.defaults(endpointDefaults);
         }
       }
       return newMethods;
     }
-    function decorate(octokit2, scope, methodName, defaults, decorations) {
-      const requestWithDefaults = octokit2.request.defaults(defaults);
+    function decorate(octokit, scope, methodName, defaults, decorations) {
+      const requestWithDefaults = octokit.request.defaults(defaults);
       function withDecorations(...args) {
         let options = requestWithDefaults.endpoint.merge(...args);
         if (decorations.mapToData) {
@@ -6030,16 +6030,16 @@ var require_dist_node9 = __commonJS({
         }
         if (decorations.renamed) {
           const [newScope, newMethodName] = decorations.renamed;
-          octokit2.log.warn(`octokit.${scope}.${methodName}() has been renamed to octokit.${newScope}.${newMethodName}()`);
+          octokit.log.warn(`octokit.${scope}.${methodName}() has been renamed to octokit.${newScope}.${newMethodName}()`);
         }
         if (decorations.deprecated) {
-          octokit2.log.warn(decorations.deprecated);
+          octokit.log.warn(decorations.deprecated);
         }
         if (decorations.renamedParameters) {
           const options2 = requestWithDefaults.endpoint.merge(...args);
           for (const [name, alias] of Object.entries(decorations.renamedParameters)) {
             if (name in options2) {
-              octokit2.log.warn(`"${name}" parameter is deprecated for "octokit.${scope}.${methodName}()". Use "${alias}" instead`);
+              octokit.log.warn(`"${name}" parameter is deprecated for "octokit.${scope}.${methodName}()". Use "${alias}" instead`);
               if (!(alias in options2)) {
                 options2[alias] = options2[name];
               }
@@ -6052,8 +6052,8 @@ var require_dist_node9 = __commonJS({
       }
       return Object.assign(withDecorations, requestWithDefaults);
     }
-    function restEndpointMethods(octokit2) {
-      return endpointsToMethods(octokit2, Endpoints);
+    function restEndpointMethods(octokit) {
+      return endpointsToMethods(octokit, Endpoints);
     }
     restEndpointMethods.VERSION = VERSION;
     exports.restEndpointMethods = restEndpointMethods;
@@ -6088,9 +6088,9 @@ var require_dist_node10 = __commonJS({
       response.data.total_count = totalCount;
       return response;
     }
-    function iterator(octokit2, route, parameters) {
-      const options = typeof route === "function" ? route.endpoint(parameters) : octokit2.request.endpoint(route, parameters);
-      const requestMethod = typeof route === "function" ? route : octokit2.request;
+    function iterator(octokit, route, parameters) {
+      const options = typeof route === "function" ? route.endpoint(parameters) : octokit.request.endpoint(route, parameters);
+      const requestMethod = typeof route === "function" ? route : octokit.request;
       const method = options.method;
       const headers = options.headers;
       let url = options.url;
@@ -6115,14 +6115,14 @@ var require_dist_node10 = __commonJS({
         })
       };
     }
-    function paginate(octokit2, route, parameters, mapFn) {
+    function paginate(octokit, route, parameters, mapFn) {
       if (typeof parameters === "function") {
         mapFn = parameters;
         parameters = void 0;
       }
-      return gather(octokit2, [], iterator(octokit2, route, parameters)[Symbol.asyncIterator](), mapFn);
+      return gather(octokit, [], iterator(octokit, route, parameters)[Symbol.asyncIterator](), mapFn);
     }
-    function gather(octokit2, results, iterator2, mapFn) {
+    function gather(octokit, results, iterator2, mapFn) {
       return iterator2.next().then((result) => {
         if (result.done) {
           return results;
@@ -6135,16 +6135,16 @@ var require_dist_node10 = __commonJS({
         if (earlyExit) {
           return results;
         }
-        return gather(octokit2, results, iterator2, mapFn);
+        return gather(octokit, results, iterator2, mapFn);
       });
     }
     var composePaginateRest = Object.assign(paginate, {
       iterator
     });
-    function paginateRest(octokit2) {
+    function paginateRest(octokit) {
       return {
-        paginate: Object.assign(paginate.bind(null, octokit2), {
-          iterator: iterator.bind(null, octokit2)
+        paginate: Object.assign(paginate.bind(null, octokit), {
+          iterator: iterator.bind(null, octokit)
         })
       };
     }
@@ -24848,9 +24848,9 @@ var import_core = __toESM(require_core());
 
 // src/lib.js
 var import_github = __toESM(require_github());
-var createComment = async function(octokit2, pull, message) {
+var createComment = async function(octokit, pull, message) {
   try {
-    await octokit2.issues.createComment({
+    await octokit.issues.createComment({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
       issue_number: pull,
@@ -24861,10 +24861,10 @@ var createComment = async function(octokit2, pull, message) {
     console.log(e.message);
   }
 };
-var cleanup = async function(octokit2, tempBranch) {
+var cleanup = async function(octokit, tempBranch) {
   try {
     console.log(`Deleting temp branch: ${tempBranch}`);
-    await octokit2.request("DELETE /repos/{owner}/{repo}/git/refs/{ref}", {
+    await octokit.request("DELETE /repos/{owner}/{repo}/git/refs/{ref}", {
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
       ref: `heads/${tempBranch}`
@@ -24876,7 +24876,7 @@ var cleanup = async function(octokit2, tempBranch) {
 };
 
 // src/merge.js
-var groupLabeledPullRequests = async function(octokit2) {
+var groupLabeledPullRequests = async function(octokit) {
   const splitUrl = import_github2.context.payload.comment.issue_url.split("/");
   const currentIssueNumber = parseInt(splitUrl[splitUrl.length - 1], 10);
   const tempBranch = `temp-ci-${import_github2.context.repo.repo}-${Date.now()}`;
@@ -24887,7 +24887,7 @@ var groupLabeledPullRequests = async function(octokit2) {
     const label = (0, import_core.getInput)("target-label");
     const excludeCurrent = (0, import_core.getInput)("exclude-current");
     const q = `is:pull-request label:${label} repo:${import_github2.context.repo.owner}/${import_github2.context.repo.repo} state:open`;
-    const { data } = await octokit2.search.issuesAndPullRequests({
+    const { data } = await octokit.search.issuesAndPullRequests({
       q,
       sort: "created",
       order: "desc"
@@ -24895,7 +24895,7 @@ var groupLabeledPullRequests = async function(octokit2) {
     if (excludeCurrent === "true" && data.total_count <= 0) {
       return "default";
     }
-    const { data: currentPull } = await octokit2.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", {
+    const { data: currentPull } = await octokit.request("GET /repos/{owner}/{repo}/pulls/{pull_number}", {
       owner: import_github2.context.repo.owner,
       repo: import_github2.context.repo.repo,
       pull_number: currentIssueNumber
@@ -24904,10 +24904,10 @@ var groupLabeledPullRequests = async function(octokit2) {
       prLinks += `- ${currentPull.html_url}
 `;
       comment += prLinks;
-      await createComment(octokit2, currentIssueNumber, comment);
-      await mergeBranches(octokit2, [currentPull], tempBranch);
+      await createComment(octokit, currentIssueNumber, comment);
+      await mergeBranches(octokit, [currentPull], tempBranch);
       await createComment(
-        octokit2,
+        octokit,
         currentIssueNumber,
         `:rocket: All pull requests were merged successfully from \`${tempBranch}\` into \`${(0, import_core.getInput)("integration-branch")}\`.
 
@@ -24915,7 +24915,7 @@ var groupLabeledPullRequests = async function(octokit2) {
 ---
 ${prLinks}:`
       );
-      await cleanup(octokit2, tempBranch);
+      await cleanup(octokit, tempBranch);
       (0, import_core.setOutput)("temp-branch", tempBranch);
       return;
     }
@@ -24928,7 +24928,7 @@ ${prLinks}:`
       }
       for (const item of data.items) {
         if (item.number !== currentIssueNumber) {
-          const accPull = await octokit2.request(`GET /repos/{owner}/{repo}/pulls/{pull_number}`, {
+          const accPull = await octokit.request(`GET /repos/{owner}/{repo}/pulls/{pull_number}`, {
             owner: import_github2.context.repo.owner,
             repo: import_github2.context.repo.repo,
             pull_number: item.number
@@ -24940,8 +24940,8 @@ ${prLinks}:`
         }
       }
     }
-    await mergeBranches(octokit2, pulls, tempBranch);
-    await cleanup(octokit2, tempBranch);
+    await mergeBranches(octokit, pulls, tempBranch);
+    await cleanup(octokit, tempBranch);
     (0, import_core.setOutput)("temp-branch", tempBranch);
   } catch (e) {
     if (e.message === "Merge conflict") {
@@ -24951,23 +24951,23 @@ ${prLinks}:`
 \`\`\`shell
 ${e.message}
 \`\`\``;
-    await createComment(octokit2, currentIssueNumber, message);
-    await cleanup(octokit2, tempBranch);
+    await createComment(octokit, currentIssueNumber, message);
+    await cleanup(octokit, tempBranch);
     (0, import_core.setFailed)(e.message);
   }
 };
-var mergeBranches = async function(octokit2, pulls, tempBranch) {
+var mergeBranches = async function(octokit, pulls, tempBranch) {
   const token = (0, import_core.getInput)("private-token");
   const octokitMerge = (0, import_github2.getOctokit)(token);
   const mainBranchName = (0, import_core.getInput)("main-branch");
   const integrationBranchName = (0, import_core.getInput)("integration-branch");
-  const { data: { commit: { sha } } } = await octokit2.request("GET /repos/{owner}/{repo}/branches/{branch}", {
+  const { data: { commit: { sha } } } = await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}", {
     owner: import_github2.context.repo.owner,
     repo: import_github2.context.repo.repo,
     branch: mainBranchName
   });
   console.log(`Creating branch ${tempBranch} from main with sha: ${sha}.`);
-  await octokit2.request("POST /repos/{owner}/{repo}/git/refs", {
+  await octokit.request("POST /repos/{owner}/{repo}/git/refs", {
     owner: import_github2.context.repo.owner,
     repo: import_github2.context.repo.repo,
     ref: `refs/heads/${tempBranch}`,
@@ -24975,7 +24975,7 @@ var mergeBranches = async function(octokit2, pulls, tempBranch) {
   });
   for (const pull of pulls) {
     console.log(`Merging Pull Request #${pull.number} into ${tempBranch}`);
-    await octokit2.request("POST /repos/{owner}/{repo}/merges", {
+    await octokit.request("POST /repos/{owner}/{repo}/merges", {
       owner: import_github2.context.repo.owner,
       repo: import_github2.context.repo.repo,
       base: tempBranch,
@@ -24983,7 +24983,7 @@ var mergeBranches = async function(octokit2, pulls, tempBranch) {
     });
     console.log(`Merged Pull Request #${number} into ${tempBranch} successfully.`);
   }
-  const { data: { commit: { sha: tempSha } } } = await octokit2.request("GET /repos/{owner}/{repo}/branches/{branch}", {
+  const { data: { commit: { sha: tempSha } } } = await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}", {
     owner: import_github2.context.repo.owner,
     repo: import_github2.context.repo.repo,
     branch: tempBranch
@@ -25002,6 +25002,8 @@ var mergeBranches = async function(octokit2, pulls, tempBranch) {
 var import_core2 = __toESM(require_core());
 var import_github3 = __toESM(require_github());
 async function init() {
+  const token = (0, import_core2.getInput)("repo-token");
+  const octokit = (0, import_github3.getOctokit)(token);
   await groupLabeledPullRequests(octokit);
 }
 init();
