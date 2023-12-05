@@ -1,8 +1,5 @@
-name: Bitso Pull Request Integrator
+name: Pull Request Integrator
 on:
-  issue_comment:
-    types:
-      - created
   pull_request:
     types:
       - labeled
@@ -12,26 +9,15 @@ jobs:
   pr_commented:
     # This job only runs for pull request comments
     name: Deploy on comment
-    if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check for comment
-        uses: khan/pull-request-comment-trigger@master
-        id: check-comment
-        with:
-          trigger: '/stage-deploy'
-          reaction: rocket
-          prefix_only: 'true'
-        env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
       - name: Checkout
         uses: actions/checkout@v2
       - name: Group Open PRs and Merge    
         uses: ./
-        if: steps.check-comment.outputs.triggered == 'true'
         id: group-and-merge
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           target-label: stage-ready
           main-branch: 'main'
-          trigger-comment: steps.check-comment.outputs.comment_body
+          integratoin-branch: 'staging'
