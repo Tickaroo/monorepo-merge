@@ -34,6 +34,7 @@ export const groupLabeledPullRequests = async function (octokit) {
                 console.log(`Pushing External PR #${item.number} to array`);
                 pulls.push(accPull.data);
             }
+            console.log(pulls)
             await mergeBranches(octokit, pulls, tempBranch);
         
             //cleanup function (delete temp branch)
