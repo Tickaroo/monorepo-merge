@@ -24867,7 +24867,6 @@ var groupLabeledPullRequests = async function(octokit) {
   const tempBranch = `temp-ci-${import_github2.context.repo.repo}-${Date.now()}`;
   try {
     var pulls = [];
-    var prLinks = "";
     const label = (0, import_core.getInput)("target-label");
     const q = `is:pr label:${label} repo:${import_github2.context.repo.owner}/${import_github2.context.repo.repo} state:open`;
     console.log("QUERY " + q);
@@ -24884,8 +24883,6 @@ var groupLabeledPullRequests = async function(octokit) {
           pull_number: item.number
         });
         console.log(`Pushing External PR #${item.number} to array`);
-        prLinks += `- ${item.html_url}
-`;
         pulls.push(accPull.data);
       }
       await mergeBranches(octokit, pulls, tempBranch);
@@ -24895,6 +24892,7 @@ var groupLabeledPullRequests = async function(octokit) {
       console.log("No open pull requests found");
     }
   } catch (e) {
+    console.error(e);
     if (e.message === "Merge conflict") {
       console.log("Merge conflict error.");
     }
@@ -24903,8 +24901,6 @@ var groupLabeledPullRequests = async function(octokit) {
   }
 };
 var mergeBranches = async function(octokit, pulls, tempBranch) {
-  const token = (0, import_core.getInput)("private-token");
-  const octokitMerge = (0, import_github2.getOctokit)(token);
   const mainBranchName = (0, import_core.getInput)("main-branch");
   const integrationBranchName = (0, import_core.getInput)("integration-branch");
   const { data: { commit: { sha } } } = await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}", {
@@ -24935,7 +24931,7 @@ var mergeBranches = async function(octokit, pulls, tempBranch) {
     branch: tempBranch
   });
   console.log(`Updating branch ${integrationBranchName} from ${tempBranch} with commit sha: ${tempSha}.`);
-  await octokitMerge.request("PATCH /repos/{owner}/{repo}/git/refs/{ref}", {
+  await octokit.request("PATCH /repos/{owner}/{repo}/git/refs/{ref}", {
     owner: import_github2.context.repo.owner,
     repo: import_github2.context.repo.repo,
     ref: `heads/${integrationBranchName}`,

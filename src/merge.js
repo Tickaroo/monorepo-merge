@@ -13,7 +13,6 @@ export const groupLabeledPullRequests = async function (octokit) {
     try {
         //get input from Github Job declaration
         var pulls = [];
-        var prLinks = '';
         const label = getInput('target-label');
         //Create search query
         const q = `is:pr label:${label} repo:${context.repo.owner}/${context.repo.repo} state:open`;
@@ -33,7 +32,6 @@ export const groupLabeledPullRequests = async function (octokit) {
                     pull_number: item.number
                 });
                 console.log(`Pushing External PR #${item.number} to array`);
-                prLinks += `- ${item.html_url}\n`;
                 pulls.push(accPull.data);
             }
             await mergeBranches(octokit, pulls, tempBranch);
@@ -48,6 +46,7 @@ export const groupLabeledPullRequests = async function (octokit) {
         
 
     } catch (e) {
+        console.error(e)
         if (e.message === "Merge conflict") {
             console.log("Merge conflict error.")
             //Add label
@@ -66,8 +65,8 @@ export const groupLabeledPullRequests = async function (octokit) {
  */
 const mergeBranches = async function (octokit, pulls, tempBranch) {
     //get client with permissions to merge
-    const token = getInput('private-token');
-    const octokitMerge = getOctokit(token);
+    // const token = getInput('private-token');
+    // const octokitMerge = getOctokit(token);
     //get latest main branch sha.
     const mainBranchName = getInput('main-branch');
     const integrationBranchName = getInput('integration-branch');
@@ -102,7 +101,7 @@ const mergeBranches = async function (octokit, pulls, tempBranch) {
         branch: tempBranch
     });
     console.log(`Updating branch ${integrationBranchName} from ${tempBranch} with commit sha: ${tempSha}.`);
-    await octokitMerge.request('PATCH /repos/{owner}/{repo}/git/refs/{ref}', {
+    await octokit.request('PATCH /repos/{owner}/{repo}/git/refs/{ref}', {
         owner: context.repo.owner,
         repo: context.repo.repo,
         ref: `heads/${integrationBranchName}`,
