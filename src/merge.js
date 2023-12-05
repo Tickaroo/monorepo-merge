@@ -115,7 +115,7 @@ const mergeBranches = async function (octokit, pulls, tempBranch) {
         });
     } catch(e) {
         console.log(`Creating branch ${integrationBranchName} from ${tempBranch} with commit sha: ${tempSha}.`);
-        await octokit.request('POST /repos/{owner}/{repo}/git/refs/{ref}', {
+        await octokit.request('POST /repos/{owner}/{repo}/git/refs', {
             owner: context.repo.owner,
             repo: context.repo.repo,
             ref: `heads/${integrationBranchName}`,
